@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title></title>
+  <title>Vehicle Match Demo</title>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
     integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -57,19 +57,75 @@
 </head>
 
 <body>
-  <section class="container main-container">     
+  <section class="container main-container">
     <form class="form-group">
-      <div class="col-sm-12 container">        
-        <div class="col-sm-4">
-          <label>Matched Car Ids</label>
-          <ul>
-            {{#each matchedData}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>        
+      <div class="col-sm-12">
+        <h3 class="text-center text-danger">Select Vehicle Type</h3>
+        <select class="form-control" id="typeName" onchange="getCars()">
+          <option value="">Select Vehicle Type / All</option>
+          {{#each vehicleTypes}}
+          <option value="{{this.typeName}}">{{this.typeName}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="col-sm-12 text-center">
+        <h3 class="text-warning">Results</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Id</th>
+              <th scope="col">Make</th>
+              <th scope="col">Model</th>
+              <th scope="col">Registration Date</th>
+            </tr>
+          </thead>
+          <tbody id="car-html">
+            
+          </tbody>
+        </table>        
+      </div>
+      <div class="col-sm-12 mt-5 text-center">        
+        <h4 id="message" style="color: orange;"></h4>
       </div>
     </form>
   </section>
 </body>
+
+<script>
+  function getCars() {
+    let params = {
+      "typeName": $("#typeName").val()
+    };
+
+    let url = APP_URL + `get-cars`;
+    $("#message").html('Please wait..');
+    $("#car-html").val('');    
+    $.ajax({
+      url: url,
+      method: 'get',
+      data: params,
+      success: function (res) {
+        $("#message").html('');
+        let carHtml = ``;
+        if (res.success) {
+          let result = res.result;          
+          for (let i = 0; i < result.length; i++) {
+            let car = result[i];
+            carHtml = carHtml + `<tr>
+                                  <th scope="row">${car.id}</th>
+                                  <td class="text-left">${car.make}</td>
+                                  <td class="text-left">${car.model}</td>
+                                  <td class="text-left">${car.regDate}</td>
+                                </tr>`;
+          }          
+        }
+        $("#car-html").html(carHtml);
+        $("#message").html(res.message);
+      }
+    });
+  }
+
+  getCars();
+</script>
+
 </html>
